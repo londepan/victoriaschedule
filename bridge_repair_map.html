@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bridge Repair Locations – VOH 0429-7007</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1f2e; color: #e8eaf0; height: 100vh; display: flex; flex-direction: column; }
+
+  #header {
+    background: #12172a;
+    border-bottom: 2px solid #2e3a5c;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  #header h1 { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 0.02em; }
+  #header p  { font-size: 11px; color: #8892b0; margin-top: 2px; }
+
+  #legend {
+    display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  .leg-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #c8d0e0; }
+  .leg-dot  { width: 13px; height: 13px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.35); flex-shrink: 0; }
+
+  #stats {
+    display: flex; gap: 8px; flex-wrap: wrap; padding: 8px 18px;
+    background: #12172a; border-bottom: 1px solid #2e3a5c; flex-shrink: 0;
+  }
+  .stat-card {
+    background: #1e2740; border: 1px solid #2e3a5c; border-radius: 6px;
+    padding: 5px 12px; text-align: center;
+  }
+  .stat-card .val { font-size: 16px; font-weight: 700; color: #7eb8f7; }
+  .stat-card .lbl { font-size: 10px; color: #8892b0; margin-top: 1px; }
+
+  #controls {
+    padding: 6px 18px; background: #12172a; border-bottom: 1px solid #2e3a5c;
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap; flex-shrink: 0;
+  }
+  #controls label { font-size: 11px; color: #8892b0; margin-right: 2px; }
+  select, input[type=range] {
+    background: #1e2740; border: 1px solid #2e3a5c; color: #e8eaf0;
+    border-radius: 4px; padding: 3px 7px; font-size: 12px;
+  }
+  .filter-btn {
+    padding: 4px 10px; border-radius: 4px; border: 1px solid #2e3a5c;
+    background: #1e2740; color: #c8d0e0; font-size: 11px; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .filter-btn.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+  .filter-btn:hover  { background: #263660; }
+
+  #map { flex: 1; }
+
+  /* Leaflet popup overrides */
+  .leaflet-popup-content-wrapper {
+    background: #12172a !important; border: 1px solid #3b5bdb !important;
+    border-radius: 10px !important; box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important;
+    color: #e8eaf0 !important; padding: 0 !important;
+  }
+  .leaflet-popup-tip { background: #12172a !important; }
+  .leaflet-popup-content { margin: 0 !important; width: auto !important; }
+
+  .popup-inner { padding: 14px 16px; min-width: 220px; }
+  .popup-loc   { font-size: 11px; color: #8892b0; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+  .popup-name  { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+  .popup-road  { font-size: 12px; color: #a8b4cc; margin-bottom: 8px; }
+  .popup-divider { border: none; border-top: 1px solid #2e3a5c; margin: 8px 0; }
+  .popup-row   { display: flex; justify-content: space-between; font-size: 12px; padding: 2px 0; }
+  .popup-key   { color: #8892b0; }
+  .popup-val   { color: #e8eaf0; font-weight: 600; }
+  .popup-qty   { font-size: 24px; font-weight: 800; margin: 8px 0 2px; }
+  .popup-tag   { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-top: 4px; }
+
+  .leaflet-control-zoom a {
+    background: #1e2740 !important; color: #c8d0e0 !important;
+    border-color: #2e3a5c !important;
+  }
+  .leaflet-control-zoom a:hover { background: #263660 !important; }
+  .leaflet-control-attribution { background: rgba(18,23,42,0.8) !important; color: #555 !important; }
+  .leaflet-control-attribution a { color: #666 !important; }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div>
+    <h1>Bridge Repair Locations — Item 0429-7007</h1>
+    <p>Concrete Structure Repair (Vertical &amp; Overhead) &nbsp;|&nbsp; Victoria District &nbsp;|&nbsp; Production Rate: 30 SF/day</p>
+  </div>
+  <div id="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:#f97316;border-color:#c2410c;"></div>1–5 SF</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#eab308;border-color:#a16207;"></div>6–10 SF</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#3b82f6;border-color:#1d4ed8;"></div>11–40 SF</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#a855f7;border-color:#7e22ce;"></div>41+ SF</div>
+  </div>
+</div>
+
+<div id="stats">
+  <div class="stat-card"><div class="val" id="s-total">34</div><div class="lbl">Locations</div></div>
+  <div class="stat-card"><div class="val" id="s-sf">697</div><div class="lbl">Total SF</div></div>
+  <div class="stat-card"><div class="val" id="s-days">23.2</div><div class="lbl">Crew-Days</div></div>
+  <div class="stat-card"><div class="val" style="color:#f97316" id="s-orange">8</div><div class="lbl">1–5 SF</div></div>
+  <div class="stat-card"><div class="val" style="color:#eab308" id="s-yellow">6</div><div class="lbl">6–10 SF</div></div>
+  <div class="stat-card"><div class="val" style="color:#3b82f6" id="s-blue">15</div><div class="lbl">11–40 SF</div></div>
+  <div class="stat-card"><div class="val" style="color:#a855f7" id="s-purple">4</div><div class="lbl">41+ SF</div></div>
+</div>
+
+<div id="controls">
+  <label>Filter by county:</label>
+  <select id="county-filter">
+    <option value="all">All Counties</option>
+    <option value="Austin">Austin</option>
+    <option value="Calhoun">Calhoun</option>
+    <option value="Colorado">Colorado</option>
+    <option value="Jackson">Jackson</option>
+    <option value="Matagorda">Matagorda</option>
+    <option value="Victoria">Victoria</option>
+    <option value="Wharton">Wharton</option>
+  </select>
+  <label style="margin-left:8px;">Show range:</label>
+  <button class="filter-btn active" data-range="all">All</button>
+  <button class="filter-btn" data-range="orange">1–5 SF</button>
+  <button class="filter-btn" data-range="yellow">6–10 SF</button>
+  <button class="filter-btn" data-range="blue">11–40 SF</button>
+  <button class="filter-btn" data-range="purple">41+ SF</button>
+  <button class="filter-btn" style="margin-left:8px;" id="reset-view">Reset View</button>
+</div>
+
+<div id="map"></div>
+
+<script>
+var data = [
+  {loc:1,  lat:29.686483, lng:-96.129672, qty:6,   road:"SH 36",       feat:"Flat Creek",              county:"Austin",    nbi:"130080018704011", sheet:8},
+  {loc:2,  lat:28.492539, lng:-96.846730, qty:18,  road:"SH 35",       feat:"Schwings Bayou Relief",   county:"Calhoun",   nbi:"130290018001042", sheet:9},
+  {loc:3,  lat:28.487603, lng:-96.851656, qty:9,   road:"SH 35",       feat:"Schwings Bayou",          county:"Calhoun",   nbi:"130290018001043", sheet:10},
+  {loc:4,  lat:29.496136, lng:-96.419968, qty:4,   road:"SH 71",       feat:"Marys Branch",            county:"Colorado",  nbi:"130450026604032", sheet:12},
+  {loc:5,  lat:28.913127, lng:-96.773587, qty:67,  road:"US 59 NB",    feat:"Arenosa Creek",           county:"Jackson",   nbi:"131210008903006", sheet:13},
+  {loc:6,  lat:28.922783, lng:-96.755116, qty:13,  road:"US 59 NB",    feat:"W Dry Creek",             county:"Jackson",   nbi:"131210008903007", sheet:14},
+  {loc:7,  lat:28.986756, lng:-96.650653, qty:13,  road:"US 59 SB",    feat:"SH 111",                  county:"Jackson",   nbi:"131210008903114", sheet:15},
+  {loc:8,  lat:29.025428, lng:-96.553057, qty:8,   road:"US 59 SB",    feat:"Navidad River & Lake Texana", county:"Jackson", nbi:"131210008904062", sheet:16},
+  {loc:9,  lat:28.990040, lng:-96.642071, qty:40,  road:"US 59",       feat:"Post Oak Branch",         county:"Jackson",   nbi:"131210008904118", sheet:17},
+  {loc:10, lat:29.049529, lng:-96.515560, qty:4,   road:"US 59 NB",    feat:"FM 710",                  county:"Jackson",   nbi:"131210008904165", sheet:18},
+  {loc:11, lat:29.024008, lng:-96.505032, qty:2,   road:"SH 172",      feat:"Lake Texana Mustang Ck",  county:"Jackson",   nbi:"131210042001015", sheet:19},
+  {loc:12, lat:28.983077, lng:-95.966639, qty:10,  road:"SH 35",       feat:"Cottonwood Creek",        county:"Matagorda", nbi:"131580017904038", sheet:20},
+  {loc:13, lat:28.761200, lng:-96.983448, qty:14,  road:"US 59 SB",    feat:"Union Pacific RR",        county:"Victoria",  nbi:"132350008805040", sheet:21},
+  {loc:14, lat:28.761064, lng:-96.983283, qty:8,   road:"US 59 NB",    feat:"Union Pacific RR",        county:"Victoria",  nbi:"132350008805041", sheet:22},
+  {loc:15, lat:28.766383, lng:-96.977882, qty:29,  road:"SH 185",      feat:"US 59",                   county:"Victoria",  nbi:"132350008805042", sheet:23},
+  {loc:16, lat:28.741527, lng:-97.024125, qty:12,  road:"US 59 NB",    feat:"Guadalupe West Relief #1",county:"Victoria",  nbi:"132350008805046", sheet:24},
+  {loc:17, lat:28.786058, lng:-97.038165, qty:127, road:"BU 59/77 NB", feat:"Guadalupe River Relief #1",county:"Victoria", nbi:"132350008806019", sheet:25},
+  {loc:19, lat:28.873209, lng:-96.849846, qty:15,  road:"US 59 NB",    feat:"Casa Blanca Ck Tributary",county:"Victoria",  nbi:"132350008901144", sheet:29},
+  {loc:20, lat:28.892520, lng:-96.820676, qty:20,  road:"US 59 SB",    feat:"Garcitas Creek",          county:"Victoria",  nbi:"132350008901146", sheet:30},
+  {loc:21, lat:28.905452, lng:-96.792139, qty:20,  road:"US 59 SB",    feat:"FM 444",                  county:"Victoria",  nbi:"132350008901148", sheet:31},
+  {loc:22, lat:28.660461, lng:-97.047058, qty:7,   road:"US 77",       feat:"Drain",                   county:"Victoria",  nbi:"132350037101042", sheet:32},
+  {loc:23, lat:28.711850, lng:-97.042488, qty:3,   road:"US 77 NB",    feat:"Coleto Creek",            county:"Victoria",  nbi:"132350037101051", sheet:33},
+  {loc:24, lat:28.692076, lng:-97.046997, qty:22,  road:"US 77",       feat:"Drain",                   county:"Victoria",  nbi:"132350037101039", sheet:34},
+  {loc:25, lat:28.682936, lng:-97.047009, qty:50,  road:"US 77",       feat:"Drain",                   county:"Victoria",  nbi:"132350037101040", sheet:35},
+  {loc:26, lat:28.666735, lng:-97.047249, qty:60,  road:"US 77",       feat:"Drain",                   county:"Victoria",  nbi:"132350037101041", sheet:36},
+  {loc:27, lat:28.719759, lng:-96.777474, qty:3,   road:"FM 616",      feat:"Draw",                    county:"Victoria",  nbi:"132350049705016", sheet:37},
+  {loc:28, lat:28.812748, lng:-97.082817, qty:16,  road:"FM 236",      feat:"Draw",                    county:"Victoria",  nbi:"132350084203020", sheet:38},
+  {loc:29, lat:28.857096, lng:-97.025302, qty:2,   road:"US 77",       feat:"US 87 & UPRR",            county:"Victoria",  nbi:"132350235001079", sheet:39},
+  {loc:30, lat:29.174965, lng:-96.277106, qty:1,   road:"US 59 NB",    feat:"FM 1163",                 county:"Wharton",   nbi:"132410008906087", sheet:40},
+  {loc:31, lat:29.180871, lng:-96.254647, qty:12,  road:"US 59 SB",    feat:"Tres Palacios River",     county:"Wharton",   nbi:"132410008907094", sheet:41},
+  {loc:32, lat:29.241529, lng:-96.195500, qty:11,  road:"LP 526",      feat:"Jones Creek",             county:"Wharton",   nbi:"132410008916027", sheet:42},
+  {loc:33, lat:29.235078, lng:-96.334666, qty:32,  road:"FM 1300",     feat:"Draw",                    county:"Wharton",   nbi:"132410042011017", sheet:43},
+  {loc:34, lat:29.176902, lng:-96.194604, qty:9,   road:"FM 1162",     feat:"Blue Creek",              county:"Wharton",   nbi:"132410130401004", sheet:44}
+];
+
+function getColor(q){
+  if(q<=5)  return {fill:'#f97316',stroke:'#c2410c',label:'1–5 SF',   bg:'rgba(249,115,22,0.15)',  text:'#fb923c', range:'orange'};
+  if(q<=10) return {fill:'#eab308',stroke:'#a16207',label:'6–10 SF',  bg:'rgba(234,179,8,0.15)',   text:'#fbbf24', range:'yellow'};
+  if(q<=40) return {fill:'#3b82f6',stroke:'#1d4ed8',label:'11–40 SF', bg:'rgba(59,130,246,0.15)',  text:'#60a5fa', range:'blue'};
+  return          {fill:'#a855f7',stroke:'#7e22ce',label:'41+ SF',    bg:'rgba(168,85,247,0.15)',  text:'#c084fc', range:'purple'};
+}
+function getRadius(q){
+  if(q<=5)  return 9;
+  if(q<=10) return 11;
+  if(q<=40) return 13;
+  return 17;
+}
+
+// Init map
+var map = L.map('map', {zoomControl: true}).setView([28.88, -96.75], 9);
+
+// Satellite/street toggle layers
+var streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxZoom: 19
+});
+var topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+  attribution: '© <a href="https://opentopomap.org">OpenTopoMap</a>',
+  maxZoom: 17
+});
+var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  attribution: '© Esri, Maxar, Earthstar Geographics',
+  maxZoom: 19
+});
+
+streets.addTo(map);
+
+L.control.layers({
+  'Street Map': streets,
+  'Topographic': topo,
+  'Satellite': satellite
+}, {}, {position: 'topright'}).addTo(map);
+
+// Scale control
+L.control.scale({imperial: true, metric: false}).addTo(map);
+
+// Markers
+var markers = [];
+var markerLayer = L.layerGroup().addTo(map);
+
+function buildPopup(d) {
+  var c = getColor(d.qty);
+  var days = (d.qty/30).toFixed(1);
+  var hrs  = Math.round(d.qty/30*8);
+  return '<div class="popup-inner">' +
+    '<div class="popup-loc">Location ' + d.loc + ' &nbsp;|&nbsp; Plan Sheet ' + d.sheet + '</div>' +
+    '<div class="popup-name">' + d.feat + '</div>' +
+    '<div class="popup-road">' + d.road + ' &nbsp;&middot;&nbsp; ' + d.county + ' County</div>' +
+    '<hr class="popup-divider"/>' +
+    '<div class="popup-qty" style="color:' + c.fill + '">' + d.qty + ' SF</div>' +
+    '<div class="popup-tag" style="background:' + c.bg + ';color:' + c.text + ';">' + c.label + '</div>' +
+    '<hr class="popup-divider"/>' +
+    '<div class="popup-row"><span class="popup-key">Est. production time</span><span class="popup-val">~' + days + ' days (' + hrs + ' hrs)</span></div>' +
+    '<div class="popup-row"><span class="popup-key">NBI Number</span><span class="popup-val" style="font-size:11px;">' + d.nbi + '</span></div>' +
+    '</div>';
+}
+
+function renderMarkers(countyFilter, rangeFilter) {
+  markerLayer.clearLayers();
+  markers = [];
+
+  var visible = data.filter(function(d){
+    var cMatch = countyFilter === 'all' || d.county === countyFilter;
+    var c = getColor(d.qty);
+    var rMatch = rangeFilter === 'all' || c.range === rangeFilter;
+    return cMatch && rMatch;
+  });
+
+  visible.forEach(function(d){
+    var c = getColor(d.qty);
+    var r = getRadius(d.qty);
+
+    var m = L.circleMarker([d.lat, d.lng], {
+      radius: r,
+      fillColor: c.fill,
+      color: c.stroke,
+      weight: 2.5,
+      opacity: 1,
+      fillOpacity: 0.88
+    });
+
+    m.bindPopup(buildPopup(d), {maxWidth: 280});
+
+    // Loc number label
+    var icon = L.divIcon({
+      className: '',
+      html: '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:' +
+            (r>12?'9':'8') + 'px;font-weight:800;color:#fff;pointer-events:none;text-shadow:0 0 3px rgba(0,0,0,0.7);">' +
+            d.loc + '</div>',
+      iconSize: [r*2, r*2],
+      iconAnchor: [r, r]
+    });
+
+    var labelMarker = L.marker([d.lat, d.lng], {icon: icon, interactive: false, zIndexOffset: 1000});
+    markerLayer.addLayer(m);
+    markerLayer.addLayer(labelMarker);
+    markers.push({marker: m, data: d});
+  });
+
+  // Update stats
+  var totalSF = visible.reduce(function(a,b){return a+b.qty;},0);
+  document.getElementById('s-total').textContent = visible.length;
+  document.getElementById('s-sf').textContent = totalSF;
+  document.getElementById('s-days').textContent = (totalSF/30).toFixed(1);
+  document.getElementById('s-orange').textContent = visible.filter(function(d){return d.qty<=5;}).length;
+  document.getElementById('s-yellow').textContent = visible.filter(function(d){return d.qty>=6&&d.qty<=10;}).length;
+  document.getElementById('s-blue').textContent   = visible.filter(function(d){return d.qty>=11&&d.qty<=40;}).length;
+  document.getElementById('s-purple').textContent = visible.filter(function(d){return d.qty>=41;}).length;
+}
+
+renderMarkers('all','all');
+
+// Filters
+var countyFilter = 'all', rangeFilter = 'all';
+
+document.getElementById('county-filter').addEventListener('change', function(){
+  countyFilter = this.value;
+  renderMarkers(countyFilter, rangeFilter);
+});
+
+document.querySelectorAll('.filter-btn[data-range]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.filter-btn[data-range]').forEach(function(b){b.classList.remove('active');});
+    this.classList.add('active');
+    rangeFilter = this.dataset.range;
+    renderMarkers(countyFilter, rangeFilter);
+  });
+});
+
+document.getElementById('reset-view').addEventListener('click', function(){
+  map.setView([28.88, -96.75], 9);
+  countyFilter = 'all'; rangeFilter = 'all';
+  document.getElementById('county-filter').value = 'all';
+  document.querySelectorAll('.filter-btn[data-range]').forEach(function(b){b.classList.remove('active');});
+  document.querySelector('.filter-btn[data-range="all"]').classList.add('active');
+  renderMarkers('all','all');
+});
+</script>
+</body>
+</html>
