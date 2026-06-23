@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mobilization Trip Map – Item 0429-7007</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1f2e; color: #e8eaf0; height: 100vh; display: flex; flex-direction: column; }
+
+#header {
+  background: #12172a; border-bottom: 2px solid #2e3a5c;
+  padding: 10px 18px; display: flex; align-items: flex-start;
+  justify-content: space-between; flex-wrap: wrap; gap: 8px; flex-shrink: 0;
+}
+#header h1 { font-size: 15px; font-weight: 700; color: #fff; }
+#header p  { font-size: 11px; color: #8892b0; margin-top: 2px; }
+
+#legend {
+  display: flex; flex-wrap: wrap; gap: 5px 10px;
+  padding: 8px 18px; background: #12172a;
+  border-bottom: 1px solid #2e3a5c; flex-shrink: 0;
+}
+.leg { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #c8d0e0; white-space: nowrap; }
+.leg-dot { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; color: #fff; flex-shrink: 0; }
+
+#controls {
+  padding: 6px 18px; background: #12172a; border-bottom: 1px solid #2e3a5c;
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap; flex-shrink: 0;
+}
+.filter-btn {
+  padding: 3px 9px; border-radius: 4px; border: 1px solid #2e3a5c;
+  background: #1e2740; color: #c8d0e0; font-size: 11px; cursor: pointer;
+}
+.filter-btn.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.filter-btn:hover  { background: #263660; }
+
+#map { flex: 1; }
+
+.leaflet-popup-content-wrapper {
+  background: #12172a !important; border: 1px solid #3b5bdb !important;
+  border-radius: 10px !important; box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important;
+  color: #e8eaf0 !important; padding: 0 !important;
+}
+.leaflet-popup-tip { background: #12172a !important; }
+.leaflet-popup-content { margin: 0 !important; width: auto !important; }
+.popup-inner { padding: 13px 15px; min-width: 210px; }
+.popup-trip  { font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 2px; font-weight: 700; }
+.popup-name  { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+.popup-sub   { font-size: 12px; color: #a8b4cc; }
+.popup-div   { border: none; border-top: 1px solid #2e3a5c; margin: 8px 0; }
+.popup-row   { display: flex; justify-content: space-between; font-size: 12px; padding: 2px 0; }
+.popup-key   { color: #8892b0; }
+.popup-val   { color: #e8eaf0; font-weight: 600; }
+.leaflet-control-zoom a { background: #1e2740 !important; color: #c8d0e0 !important; border-color: #2e3a5c !important; }
+.leaflet-control-zoom a:hover { background: #263660 !important; }
+.leaflet-control-attribution { background: rgba(18,23,42,0.8) !important; color: #555 !important; }
+.leaflet-control-attribution a { color: #666 !important; }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div>
+    <h1>Mobilization Trip Map — Item 0429-7007 | CONC STR REPAIR (VERTICAL &amp; OVERHEAD)</h1>
+    <p>15 trips (A–O) color-coded by mobilization group &nbsp;|&nbsp; Click any marker for trip details &nbsp;|&nbsp; Victoria District</p>
+  </div>
+</div>
+
+<div id="legend" id="legend"></div>
+
+<div id="controls">
+  <span style="font-size:11px;color:#8892b0;">Filter:</span>
+  <button class="filter-btn active" data-trip="all">All Trips</button>
+  <button class="filter-btn" data-trip="priority">Priority (A–C)</button>
+  <button class="filter-btn" data-trip="cluster">Clusters (D–L)</button>
+  <button class="filter-btn" data-trip="isolated">Isolated (M–O)</button>
+  <button class="filter-btn" id="reset-btn" style="margin-left:8px;">Reset View</button>
+  <span style="font-size:11px;color:#8892b0;margin-left:8px;" id="showing">Showing 34 locations</span>
+</div>
+
+<div id="map"></div>
+
+<script>
+var TRIPS = {
+  A: { color: '#7c3aed', label: 'A',  desc: 'Loc 17 – Guadalupe River Relief',          county: 'Victoria',  sf: 127, days: 4.2, priority: 'priority', locs: [17] },
+  B: { color: '#db2777', label: 'B',  desc: 'Locs 5,6 – US 59 NB Arenosa/W Dry Creek', county: 'Jackson',   sf: 80,  days: 2.7, priority: 'priority', locs: [5,6] },
+  C: { color: '#dc2626', label: 'C',  desc: 'Locs 25,26 – US 77 Drains',                county: 'Victoria',  sf: 110, days: 3.7, priority: 'priority', locs: [25,26] },
+  D: { color: '#ea580c', label: 'D',  desc: 'Locs 22,23,24 – US 77 corridor',           county: 'Victoria',  sf: 32,  days: 1.1, priority: 'cluster',  locs: [22,23,24] },
+  E: { color: '#ca8a04', label: 'E',  desc: 'Locs 7,9 – US 59 SB Post Oak/SH 111',     county: 'Jackson',   sf: 53,  days: 1.8, priority: 'cluster',  locs: [7,9] },
+  F: { color: '#65a30d', label: 'F',  desc: 'Locs 8,10,11 – US 59 NB/SB near FM 710',  county: 'Jackson',   sf: 14,  days: 0.5, priority: 'cluster',  locs: [8,10,11] },
+  G: { color: '#059669', label: 'G',  desc: 'Locs 13,14,15 – US 59 Union Pacific RR',  county: 'Victoria',  sf: 51,  days: 1.7, priority: 'cluster',  locs: [13,14,15] },
+  H: { color: '#0891b2', label: 'H',  desc: 'Locs 16,28,29 – Victoria west US 59/77',  county: 'Victoria',  sf: 30,  days: 1.0, priority: 'cluster',  locs: [16,28,29] },
+  I: { color: '#2563eb', label: 'I',  desc: 'Locs 19,20,21,27 – US 59 SB corridor',    county: 'Victoria',  sf: 58,  days: 1.9, priority: 'cluster',  locs: [19,20,21,27] },
+  J: { color: '#7c3aed', label: 'J',  desc: 'Locs 30,31,33 – Wharton US 59/FM 1300',  county: 'Wharton',   sf: 45,  days: 1.5, priority: 'cluster',  locs: [30,31,33] },
+  K: { color: '#9333ea', label: 'K',  desc: 'Locs 32,34 – Wharton LP 526/FM 1162',    county: 'Wharton',   sf: 20,  days: 0.7, priority: 'cluster',  locs: [32,34] },
+  L: { color: '#c026d3', label: 'L',  desc: 'Locs 2,3 – SH 35 Schwings Bayou',        county: 'Calhoun',   sf: 27,  days: 0.9, priority: 'cluster',  locs: [2,3] },
+  M: { color: '#b45309', label: 'M',  desc: 'Loc 1 – SH 36 Flat Creek',               county: 'Austin',    sf: 6,   days: 0.2, priority: 'isolated', locs: [1] },
+  N: { color: '#92400e', label: 'N',  desc: 'Loc 4 – SH 71 Marys Branch',             county: 'Colorado',  sf: 4,   days: 0.1, priority: 'isolated', locs: [4] },
+  O: { color: '#78350f', label: 'O',  desc: 'Loc 12 – SH 35 Cottonwood Creek',        county: 'Matagorda', sf: 10,  days: 0.3, priority: 'isolated', locs: [12] },
+};
+
+var DATA = [
+  {loc:1,  lat:29.686483, lng:-96.129672, qty:6,   road:'SH 36',       feat:'Flat Creek',              county:'Austin',    trip:'M'},
+  {loc:2,  lat:28.492539, lng:-96.846730, qty:18,  road:'SH 35',       feat:'Schwings Bayou Relief',   county:'Calhoun',   trip:'L'},
+  {loc:3,  lat:28.487603, lng:-96.851656, qty:9,   road:'SH 35',       feat:'Schwings Bayou',          county:'Calhoun',   trip:'L'},
+  {loc:4,  lat:29.496136, lng:-96.419968, qty:4,   road:'SH 71',       feat:'Marys Branch',            county:'Colorado',  trip:'N'},
+  {loc:5,  lat:28.913127, lng:-96.773587, qty:67,  road:'US 59 NB',    feat:'Arenosa Creek',           county:'Jackson',   trip:'B'},
+  {loc:6,  lat:28.922783, lng:-96.755116, qty:13,  road:'US 59 NB',    feat:'W Dry Creek',             county:'Jackson',   trip:'B'},
+  {loc:7,  lat:28.986756, lng:-96.650653, qty:13,  road:'US 59 SB',    feat:'SH 111',                  county:'Jackson',   trip:'E'},
+  {loc:8,  lat:29.025428, lng:-96.553057, qty:8,   road:'US 59 SB',    feat:'Navidad River',           county:'Jackson',   trip:'F'},
+  {loc:9,  lat:28.990040, lng:-96.642071, qty:40,  road:'US 59',       feat:'Post Oak Branch',         county:'Jackson',   trip:'E'},
+  {loc:10, lat:29.049529, lng:-96.515560, qty:4,   road:'US 59 NB',    feat:'FM 710',                  county:'Jackson',   trip:'F'},
+  {loc:11, lat:29.024008, lng:-96.505032, qty:2,   road:'SH 172',      feat:'Lake Texana Mustang Ck',  county:'Jackson',   trip:'F'},
+  {loc:12, lat:28.983077, lng:-95.966639, qty:10,  road:'SH 35',       feat:'Cottonwood Creek',        county:'Matagorda', trip:'O'},
+  {loc:13, lat:28.761200, lng:-96.983448, qty:14,  road:'US 59 SB',    feat:'Union Pacific RR',        county:'Victoria',  trip:'G'},
+  {loc:14, lat:28.761064, lng:-96.983283, qty:8,   road:'US 59 NB',    feat:'Union Pacific RR',        county:'Victoria',  trip:'G'},
+  {loc:15, lat:28.766383, lng:-96.977882, qty:29,  road:'SH 185',      feat:'US 59',                   county:'Victoria',  trip:'G'},
+  {loc:16, lat:28.741527, lng:-97.024125, qty:12,  road:'US 59 NB',    feat:'Guadalupe West Relief',   county:'Victoria',  trip:'H'},
+  {loc:17, lat:28.786058, lng:-97.038165, qty:127, road:'BU 59/77 NB', feat:'Guadalupe River Relief',  county:'Victoria',  trip:'A'},
+  {loc:19, lat:28.873209, lng:-96.849846, qty:15,  road:'US 59 NB',    feat:'Casa Blanca Ck Trib',     county:'Victoria',  trip:'I'},
+  {loc:20, lat:28.892520, lng:-96.820676, qty:20,  road:'US 59 SB',    feat:'Garcitas Creek',          county:'Victoria',  trip:'I'},
+  {loc:21, lat:28.905452, lng:-96.792139, qty:20,  road:'US 59 SB',    feat:'FM 444',                  county:'Victoria',  trip:'I'},
+  {loc:22, lat:28.660461, lng:-97.047058, qty:7,   road:'US 77',       feat:'Drain',                   county:'Victoria',  trip:'D'},
+  {loc:23, lat:28.711850, lng:-97.042488, qty:3,   road:'US 77 NB',    feat:'Coleto Creek',            county:'Victoria',  trip:'D'},
+  {loc:24, lat:28.692076, lng:-97.046997, qty:22,  road:'US 77',       feat:'Drain',                   county:'Victoria',  trip:'D'},
+  {loc:25, lat:28.682936, lng:-97.047009, qty:50,  road:'US 77',       feat:'Drain',                   county:'Victoria',  trip:'C'},
+  {loc:26, lat:28.666735, lng:-97.047249, qty:60,  road:'US 77',       feat:'Drain',                   county:'Victoria',  trip:'C'},
+  {loc:27, lat:28.719759, lng:-96.777474, qty:3,   road:'FM 616',      feat:'Draw',                    county:'Victoria',  trip:'I'},
+  {loc:28, lat:28.812748, lng:-97.082817, qty:16,  road:'FM 236',      feat:'Draw',                    county:'Victoria',  trip:'H'},
+  {loc:29, lat:28.857096, lng:-97.025302, qty:2,   road:'US 77',       feat:'US 87 & UPRR',            county:'Victoria',  trip:'H'},
+  {loc:30, lat:29.174965, lng:-96.277106, qty:1,   road:'US 59 NB',    feat:'FM 1163',                 county:'Wharton',   trip:'J'},
+  {loc:31, lat:29.180871, lng:-96.254647, qty:12,  road:'US 59 SB',    feat:'Tres Palacios River',     county:'Wharton',   trip:'J'},
+  {loc:32, lat:29.241529, lng:-96.195500, qty:11,  road:'LP 526',      feat:'Jones Creek',             county:'Wharton',   trip:'K'},
+  {loc:33, lat:29.235078, lng:-96.334666, qty:32,  road:'FM 1300',     feat:'Draw',                    county:'Wharton',   trip:'J'},
+  {loc:34, lat:29.176902, lng:-96.194604, qty:9,   road:'FM 1162',     feat:'Blue Creek',              county:'Wharton',   trip:'K'},
+];
+
+// Build legend
+var legendEl = document.getElementById('legend');
+Object.keys(TRIPS).forEach(function(key) {
+  var t = TRIPS[key];
+  var div = document.createElement('div');
+  div.className = 'leg';
+  div.innerHTML = '<div class="leg-dot" style="background:'+t.color+';">'+key+'</div>' +
+    '<span>Trip '+key+' — '+t.sf+' SF / '+t.days+' days</span>';
+  legendEl.appendChild(div);
+});
+
+// Init map
+var map = L.map('map').setView([28.88, -96.75], 9);
+
+var streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxZoom: 19
+});
+var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  attribution: '&copy; Esri, Maxar, Earthstar Geographics',
+  maxZoom: 19
+});
+var topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a>',
+  maxZoom: 17
+});
+
+streets.addTo(map);
+L.control.layers({'Street Map': streets, 'Satellite': satellite, 'Topographic': topo}, {}, {position:'topright'}).addTo(map);
+L.control.scale({imperial: true, metric: false}).addTo(map);
+
+var markerLayer = L.layerGroup().addTo(map);
+var currentFilter = 'all';
+
+function getRadius(qty) {
+  if (qty <= 5)  return 10;
+  if (qty <= 10) return 12;
+  if (qty <= 40) return 14;
+  return 18;
+}
+
+function renderMarkers(filter) {
+  markerLayer.clearLayers();
+  var visible = DATA.filter(function(d) {
+    if (filter === 'all') return true;
+    return TRIPS[d.trip].priority === filter;
+  });
+
+  document.getElementById('showing').textContent = 'Showing ' + visible.length + ' locations';
+
+  visible.forEach(function(d) {
+    var t = TRIPS[d.trip];
+    var r = getRadius(d.qty);
+    var days = (d.qty / 30).toFixed(1);
+
+    var m = L.circleMarker([d.lat, d.lng], {
+      radius: r,
+      fillColor: t.color,
+      color: '#000',
+      weight: 1.5,
+      opacity: 0.9,
+      fillOpacity: 0.88
+    });
+
+    m.bindPopup(
+      '<div class="popup-inner">' +
+      '<div class="popup-trip" style="color:'+t.color+'">Trip '+d.trip+' &nbsp;&middot;&nbsp; '+t.county+' County</div>' +
+      '<div class="popup-name">Location '+d.loc+' — '+d.feat+'</div>' +
+      '<div class="popup-sub">'+d.road+'</div>' +
+      '<hr class="popup-div"/>' +
+      '<div class="popup-row"><span class="popup-key">Quantity</span><span class="popup-val" style="color:'+t.color+'">'+d.qty+' SF</span></div>' +
+      '<div class="popup-row"><span class="popup-key">Est. time</span><span class="popup-val">~'+days+' days</span></div>' +
+      '<div class="popup-row"><span class="popup-key">Trip total</span><span class="popup-val">'+t.sf+' SF / '+t.days+' days</span></div>' +
+      '<div class="popup-row"><span class="popup-key">Trip scope</span><span class="popup-val" style="font-size:11px;">'+t.desc+'</span></div>' +
+      '</div>',
+      { maxWidth: 280 }
+    );
+
+    // Letter label inside dot
+    var icon = L.divIcon({
+      className: '',
+      html: '<div style="width:'+r*2+'px;height:'+r*2+'px;display:flex;align-items:center;justify-content:center;font-size:'+(r>13?10:9)+'px;font-weight:900;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.8);pointer-events:none;">'+d.trip+'</div>',
+      iconSize: [r*2, r*2],
+      iconAnchor: [r, r]
+    });
+    var label = L.marker([d.lat, d.lng], {icon: icon, interactive: false, zIndexOffset: 1000});
+
+    markerLayer.addLayer(m);
+    markerLayer.addLayer(label);
+  });
+}
+
+renderMarkers('all');
+
+// Filter buttons
+document.querySelectorAll('.filter-btn[data-trip]').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-btn[data-trip]').forEach(function(b) { b.classList.remove('active'); });
+    this.classList.add('active');
+    currentFilter = this.dataset.trip;
+    renderMarkers(currentFilter);
+  });
+});
+
+document.getElementById('reset-btn').addEventListener('click', function() {
+  map.setView([28.88, -96.75], 9);
+  currentFilter = 'all';
+  document.querySelectorAll('.filter-btn[data-trip]').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelector('.filter-btn[data-trip="all"]').classList.add('active');
+  renderMarkers('all');
+});
+</script>
+</body>
+</html>

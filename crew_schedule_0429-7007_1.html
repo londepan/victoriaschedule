@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Crew Schedule – Item 0429-7007</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1f2e; color: #e8eaf0; min-height: 100vh; }
+
+#header {
+  background: #12172a;
+  border-bottom: 2px solid #2e3a5c;
+  padding: 14px 24px;
+}
+#header h1 { font-size: 17px; font-weight: 700; color: #fff; }
+#header p  { font-size: 12px; color: #8892b0; margin-top: 3px; }
+
+#summary {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  padding: 12px 24px; background: #12172a;
+  border-bottom: 1px solid #2e3a5c;
+}
+.stat { background: #1e2740; border: 1px solid #2e3a5c; border-radius: 6px; padding: 6px 14px; text-align: center; }
+.stat .v { font-size: 18px; font-weight: 700; color: #7eb8f7; }
+.stat .l { font-size: 10px; color: #8892b0; margin-top: 1px; }
+
+#main { padding: 20px 24px; }
+
+h2 { font-size: 14px; font-weight: 600; color: #a8b4cc; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; margin-top: 24px; }
+h2:first-child { margin-top: 0; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 8px; }
+thead th {
+  background: #1e2740; color: #8892b0; font-weight: 600;
+  padding: 8px 10px; text-align: left; border-bottom: 2px solid #2e3a5c;
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;
+}
+tbody tr { border-bottom: 1px solid #1e2740; }
+tbody tr:hover { background: #1a2235; }
+tbody td { padding: 9px 10px; vertical-align: top; }
+
+.trip-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 50%;
+  font-weight: 800; font-size: 12px; flex-shrink: 0;
+}
+.day-bar-wrap { background: #1e2740; border-radius: 4px; height: 8px; width: 100%; margin-top: 4px; }
+.day-bar { height: 8px; border-radius: 4px; }
+.loc-tag {
+  display: inline-block; background: #1e2740; border: 1px solid #2e3a5c;
+  border-radius: 4px; padding: 1px 6px; font-size: 11px; margin: 1px 2px 1px 0;
+  color: #c8d0e0;
+}
+.note { font-size: 11px; color: #8892b0; margin-top: 2px; }
+.flag { font-size: 11px; padding: 2px 7px; border-radius: 10px; font-weight: 600; }
+.flag-hot  { background: rgba(168,85,247,0.2); color: #c084fc; }
+.flag-warn { background: rgba(234,179,8,0.2);  color: #fbbf24; }
+.flag-ok   { background: rgba(59,130,246,0.2); color: #60a5fa; }
+
+/* Day calendar */
+.cal-grid {
+  display: grid;
+  grid-template-columns: 80px repeat(23, 1fr);
+  gap: 2px;
+  font-size: 11px;
+  overflow-x: auto;
+}
+.cal-hdr { background: #1e2740; color: #8892b0; text-align: center; padding: 5px 2px; border-radius: 3px; font-weight: 600; }
+.cal-label { color: #8892b0; display: flex; align-items: center; font-size: 11px; font-weight: 600; }
+.cal-cell {
+  border-radius: 3px; height: 28px; display: flex; align-items: center;
+  justify-content: center; font-size: 10px; font-weight: 700; color: #fff;
+}
+.cal-empty { background: #151a2a; border-radius: 3px; height: 28px; }
+
+.section-divider {
+  border: none; border-top: 1px solid #2e3a5c; margin: 20px 0;
+}
+
+.isolated-row { background: rgba(234,179,8,0.05); }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <h1>Crew Scheduling Plan — Item 0429-7007 | CONC STR REPAIR (VERTICAL &amp; OVERHEAD)</h1>
+  <p>Victoria District &nbsp;|&nbsp; 30 SF/day production rate &nbsp;|&nbsp; 15 mobilization trips &nbsp;|&nbsp; 697 total SF &nbsp;|&nbsp; ~23.2 crew-days production</p>
+</div>
+
+<div id="summary">
+  <div class="stat"><div class="v">34</div><div class="l">Locations</div></div>
+  <div class="stat"><div class="v">697</div><div class="l">Total SF</div></div>
+  <div class="stat"><div class="v">23.2</div><div class="l">Production Days</div></div>
+  <div class="stat"><div class="v">15</div><div class="l">Mob Trips</div></div>
+  <div class="stat"><div class="v">7</div><div class="l">Counties</div></div>
+  <div class="stat" style="border-color:#a855f7;"><div class="v" style="color:#c084fc;">4</div><div class="l">Multi-day Jobs</div></div>
+  <div class="stat" style="border-color:#eab308;"><div class="v" style="color:#fbbf24;">3</div><div class="l">Isolated Locs</div></div>
+</div>
+
+<div id="main">
+
+<h2>Trip Mobilization Schedule</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:44px;">Trip</th>
+      <th style="width:80px;">Locations</th>
+      <th>Corridor / Feature</th>
+      <th style="width:70px;">County</th>
+      <th style="width:60px;">Total SF</th>
+      <th style="width:90px;">Est. Days</th>
+      <th>Scheduling Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <tr>
+      <td><span class="trip-badge" style="background:#7c3aed;color:#fff;">A</span></td>
+      <td><span class="loc-tag">17</span></td>
+      <td>BU 59/77 NB – Guadalupe River Relief #1<div class="note">NBI 132350008806019 | Plan Sheet 25</div></td>
+      <td>Victoria</td>
+      <td>127 SF</td>
+      <td>
+        <b style="color:#c084fc;">4.2 days</b>
+        <div class="day-bar-wrap"><div class="day-bar" style="width:100%;background:#7c3aed;"></div></div>
+      </td>
+      <td><span class="flag flag-hot">Priority 1</span><div class="note">Largest single job. Plan as dedicated 5-day window. Scaffold/access setup likely needed.</div></td>
+    </tr>
+
+    <tr>
+      <td><span class="trip-badge" style="background:#7c3aed;color:#fff;">B</span></td>
+      <td><span class="loc-tag">5</span><span class="loc-tag">6</span></td>
+      <td>US 59 NB – Arenosa Creek &amp; W Dry Creek<div class="note">~1 mile apart on same NB alignment</div></td>
+      <td>Jackson</td>
+      <td>80 SF</td>
+      <td>
+        <b style="color:#c084fc;">2.7 days</b>
+        <div class="day-bar-wrap"><div class="day-bar" style="width:64%;background:#7c3aed;"></div></div>
+      </td>
+      <td><span class="flag flag-hot">Priority 2</span><div class="note">Sequence Loc 6 (13 SF) first — finish Day 1, roll to Loc 5 (67 SF) Days 1–3.</div></td>
+    </tr>
+
+    <tr>
+      <td><span class="trip-badge" style="background:#7c3aed;color:#fff;">C</span></td>
+      <td><span class="loc-tag">25</span><span class="loc-tag">26</span></td>
+      <td>US 77 – Back-to-back Drain structures<div class="note">Adjacent, same drainage corridor</div></td>
+      <td>Victoria</td>
+      <td>110 SF</td>
+      <td>
+        <b style="color:#c084fc;">3.7 days</b>
+        <div class="day-bar-wrap"><div class="day-bar" style="width:88%;background:#7c3aed;"></div></div>
+      </td>
+      <td><span class="flag flag-hot">Priority 2</span><div class="note">One mobilization, two structures. Sequence south to north (Loc 26 → 25).</div></td>
+    </tr>
+
+    <tr>
+      <td><span class="trip-badge" style="background:#2563eb;color:#fff;">D</span></td>
+      <td><span class="loc-tag">24</span><span class="loc-tag">22</span><span class="loc-tag">23</span></td>
+      <td>US 77 corridor – Three Drain structures<div class="note">~3.5 mi span, same highway</div></td>
+      <td>Victoria</td>
+      <td>32 SF</td>
+      <td>
+        <b style="color:#60a5fa;">1.1 days</b>
+        <div class="day-bar-wrap"><div class="day-bar" style="width:26%;background:#2563eb;"></div></div>
+      </td>
+      <td><span class="flag flag-ok">1-day trip</span><div class="note">Sequence south to north: Loc 22 (7) → 24 (22) → 23 (3). Combine with Trip C mobilization — same corridor, back-to-back days.</div></td>
+    </tr>
+
+    <tr>
+      <td><span class="trip-badge" style="background:#2563eb;color:#fff;">E</span></td>
+      <td><span class="loc-tag">9</span><span class="loc-tag">7</span></td>
+      <td>US 59 SB – Post Oak Branch &amp; SH 111<div class="note">~0.3 mi apart</div></td>
+      <td>Jackson</td>
+      <td>53 SF</td>
+      <td>
+        <b style="color:#60a5fa;">1.8 days</b>
+        <div class="day-bar-wrap"><div class="day-bar" style="width:43%;background:#2563eb;"></div></div>
+      </td>
+      <td><span class="flag flag-ok">2-day trip</span><div class="note">Loc 7 (13 SF) finish first day AM, roll to Loc 9 (40 SF) remainder Day 1 + Day 2.</div></td>
+    </tr>
+
+    <tr>
+      <td><span class="trip-badge" style="background:#2563eb;color:#fff;">F</span></td>
+      <td><span class="loc-tag">8</span><span class="loc-tag">10</span><span class="loc-tag">11</span></td>
+      <td>US 59 NB/SB – Navidad River, FM 710, Lake Texana<div class="note">~3 mi span near FM 710 junction</div></td>
+      <td>Jackson</td>
+      <td>14 SF</td>
+      <td>
+        <b style="color:#60a5fa;">0.5 days</b>
+        <div class="day-bar-wrap"><div class="day-bar" style="width:12%;background:#2563eb;"></div></div>
+      </td>
+      <td><span class="flag flag-ok">Half-day</span><div class="note">Combine with Trip E — same mobilization, add half-day. Locs 11 (2) + 10 (4) + 8 (8) in sequence.</div></td>
+    </tr>
+
+    <tr>
+      <td><span class="trip-badge" style="background:#2563eb;color:#fff;">G</span></td>
+      <td><span class="loc-tag">13</span><span class="loc-tag">14</span><span class="loc-tag">15</span></td>
+      <td>US 59 / SH 185 – Union Pacific RR crossings<div class="note">Locs 13 &amp; 14 nearly co-located NB/SB; Loc 15 ~0.4 mi north</div></td>
+      <td>Victoria</td>
+      <td>51 SF</td>
+      <td>
+        <b style="color:#60a5fa;">1.7 days</b>
+        <div class="day-bar-wrap"><div class="day-bar" style="width:40%;background:#2563eb;"></div></div>
+      </td>
+      <td><span class="flag flag-ok">2-day trip</span><div class="note">Loc 14 (8 SF) + Loc 13 (14 SF) Day 1 AM; Loc 15 (29 SF) Day 1 PM + Day 2 AM.</div></td>
+    </tr>
+
+    <tr>
+      <td><span class="trip-badge" style="background:#2563eb;color:#fff;">H</span></td>
+      <td><span class="loc-tag">16</span><span class="loc-tag">28</span><span class="loc-tag">29</span></td>
+      <td>Victoria west – US 59, FM 236, US 77<div class="note">~6 mi spread; reasonable 1-day combo</div></td>
+      <td>Victoria</td>
+      <td>30 SF</td>
+      <td>
+        <b style="color:#60a5fa;">1.0 days</b>
+        <div class="day-bar-wrap"><div class="day-bar" style="width:24%;background:#2563eb;"></div></div>
+      </td>
+      <td><span class="flag flag-ok">1-day trip</span><div class="note">Sequence: Loc 29 (2 SF) → Loc 28 (16 SF) → Loc 16 (12 SF). Consider pairing with Trip A or G mobilization.</div></td>
+    </tr>
+
+    <tr>
+      <td><span class="trip-badge" style="background:#2563eb;color:#fff;">I</span></td>
+      <td><span class="loc-tag">19</span><span class="loc-tag">20</span><span class="loc-tag">21</span><span class="loc-tag">27</span></td>
+      <td>US 59 SB – Casa Blanca, Garcitas, FM 444, FM 616<div class="note">Corridor sweep ~8 mi</div></td>
+      <td>Victoria</td>
+      <td>58 SF</td>
+      <td>
+        <b style="color:#60a5fa;">1.9 days</b>
+        <div class="day-bar-wrap"><div class="day-bar" style="width:45%;background:#2563eb;"></div></div>
+      </td>
+      <td><span class="flag flag-ok">2-day trip</span><div class="note">Loc 27 (3) is a slight detour on FM 616 — pick up en route. North to south: 19 → 21 → 20 → 27.</div></td>
+    </tr>
+
+    <tr>
+      <td><span class="trip-badge" style="background:#2563eb;color:#fff;">J</span></td>
+      <td><span class="loc-tag">33</span><span class="loc-tag">31</span><span class="loc-tag">30</span></td>
+      <td>Wharton – FM 1300, US 59 SB/NB<div class="note">Staircase south along US 59 corridor</div></td>
+      <td>Wharton</td>
+      <td>45 SF</td>
+      <td>
+        <b style="color:#60a5fa;">1.5 days</b>
+        <div class="day-bar-wrap"><div class="day-bar" style="width:36%;background:#2563eb;"></div></div>
+      </td>
+      <td><span class="flag flag-ok">2-day trip</span><div class="note">Sequence west to east: Loc 33 (32 SF) Day 1 → Loc 31 (12 SF) + Loc 30 (1 SF) Day 2 AM.</div></td>
+    </tr>
+
+    <tr>
+      <td><span class="trip-badge" style="background:#2563eb;color:#fff;">K</span></td>
+      <td><span class="loc-tag">32</span><span class="loc-tag">34</span></td>
+      <td>Wharton – LP 526 / Jones Creek &amp; FM 1162 / Blue Creek<div class="note">~3 mi apart near Wharton</div></td>
+      <td>Wharton</td>
+      <td>20 SF</td>
+      <td>
+        <b style="color:#60a5fa;">0.7 days</b>
+        <div class="day-bar-wrap"><div class="day-bar" style="width:17%;background:#2563eb;"></div></div>
+      </td>
+      <td><span class="flag flag-ok">1-day trip</span><div class="note">Combine with Trip J — same mobilization to Wharton Co., add half-day. Loc 34 (9) → Loc 32 (11).</div></td>
+    </tr>
+
+    <tr>
+      <td><span class="trip-badge" style="background:#2563eb;color:#fff;">L</span></td>
+      <td><span class="loc-tag">2</span><span class="loc-tag">3</span></td>
+      <td>SH 35 – Schwings Bayou Relief &amp; Schwings Bayou<div class="note">Adjacent crossings, ~0.3 mi apart</div></td>
+      <td>Calhoun</td>
+      <td>27 SF</td>
+      <td>
+        <b style="color:#60a5fa;">0.9 days</b>
+        <div class="day-bar-wrap"><div class="day-bar" style="width:22%;background:#2563eb;"></div></div>
+      </td>
+      <td><span class="flag flag-ok">1-day trip</span><div class="note">One mobilization for both crossings. Loc 3 (9 SF) AM → Loc 2 (18 SF) PM.</div></td>
+    </tr>
+
+    <tr class="isolated-row">
+      <td><span class="trip-badge" style="background:#b45309;color:#fff;">M</span></td>
+      <td><span class="loc-tag">1</span></td>
+      <td>SH 36 / Flat Creek<div class="note">NBI 130080018704011 | Plan Sheet 8</div></td>
+      <td>Austin</td>
+      <td>6 SF</td>
+      <td>
+        <b style="color:#fbbf24;">0.2 days</b>
+        <div class="day-bar-wrap"><div class="day-bar" style="width:5%;background:#b45309;"></div></div>
+      </td>
+      <td><span class="flag flag-warn">Isolated</span><div class="note">Austin Co. — distant from other locations. Bundle as a pass-through day when crew is repositioning between Wharton and Jackson clusters. Avoid standalone mobilization.</div></td>
+    </tr>
+
+    <tr class="isolated-row">
+      <td><span class="trip-badge" style="background:#b45309;color:#fff;">N</span></td>
+      <td><span class="loc-tag">4</span></td>
+      <td>SH 71 / Marys Branch<div class="note">NBI 130450026604032 | Plan Sheet 12</div></td>
+      <td>Colorado</td>
+      <td>4 SF</td>
+      <td>
+        <b style="color:#fbbf24;">0.1 days</b>
+        <div class="day-bar-wrap"><div class="day-bar" style="width:3%;background:#b45309;"></div></div>
+      </td>
+      <td><span class="flag flag-warn">Isolated</span><div class="note">Colorado Co. — Consider grouping with Trip M (SH 71 passes through Colorado Co. en route from Wharton to Austin). Sub-2-hr job; absorb into travel day.</div></td>
+    </tr>
+
+    <tr class="isolated-row">
+      <td><span class="trip-badge" style="background:#b45309;color:#fff;">O</span></td>
+      <td><span class="loc-tag">12</span></td>
+      <td>SH 35 / Cottonwood Creek<div class="note">NBI 131580017904038 | Plan Sheet 20</div></td>
+      <td>Matagorda</td>
+      <td>10 SF</td>
+      <td>
+        <b style="color:#fbbf24;">0.3 days</b>
+        <div class="day-bar-wrap"><div class="day-bar" style="width:7%;background:#b45309;"></div></div>
+      </td>
+      <td><span class="flag flag-warn">Isolated</span><div class="note">Matagorda Co. — easternmost location. Bundle with Trip L (Calhoun) — SH 35 connects both. Loc 12 → Loc 2/3 in one corridor day.</div></td>
+    </tr>
+
+  </tbody>
+</table>
+
+<hr class="section-divider"/>
+<h2>Suggested Bundling for Isolated Locations</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Isolated Trip</th>
+      <th>Bundle With</th>
+      <th>Logic</th>
+      <th>Combined SF</th>
+      <th>Combined Days</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="trip-badge" style="background:#b45309;color:#fff;display:inline-flex;">M</span> Austin Co. (Loc 1, 6 SF)</td>
+      <td><span class="trip-badge" style="background:#2563eb;color:#fff;display:inline-flex;">N</span> Colorado Co. (Loc 4)</td>
+      <td>Combine as a single travel day repositioning crew from Wharton to Jackson. SH 71 → SH 36 corridor.</td>
+      <td>10 SF</td>
+      <td>~0.3 days + travel</td>
+    </tr>
+    <tr>
+      <td><span class="trip-badge" style="background:#b45309;color:#fff;display:inline-flex;">O</span> Matagorda Co. (Loc 12, 10 SF)</td>
+      <td><span class="trip-badge" style="background:#2563eb;color:#fff;display:inline-flex;">L</span> Calhoun Co. (Locs 2, 3)</td>
+      <td>SH 35 connects Matagorda → Calhoun continuously. Add Loc 12 as first stop before heading to Schwings Bayou crossings.</td>
+      <td>37 SF</td>
+      <td>~1.2 days</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr class="section-divider"/>
+<h2>Production Calendar — Sequenced by Priority</h2>
+<p style="font-size:12px;color:#8892b0;margin-bottom:12px;">Approximate day-by-day sequence assuming one crew, driving between locations. Travel days between county clusters not shown.</p>
+
+<div class="cal-grid">
+  <!-- Header row -->
+  <div class="cal-hdr" style="background:transparent;"></div>
+  <div class="cal-hdr">D1</div><div class="cal-hdr">D2</div><div class="cal-hdr">D3</div>
+  <div class="cal-hdr">D4</div><div class="cal-hdr">D5</div><div class="cal-hdr">D6</div>
+  <div class="cal-hdr">D7</div><div class="cal-hdr">D8</div><div class="cal-hdr">D9</div>
+  <div class="cal-hdr">D10</div><div class="cal-hdr">D11</div><div class="cal-hdr">D12</div>
+  <div class="cal-hdr">D13</div><div class="cal-hdr">D14</div><div class="cal-hdr">D15</div>
+  <div class="cal-hdr">D16</div><div class="cal-hdr">D17</div><div class="cal-hdr">D18</div>
+  <div class="cal-hdr">D19</div><div class="cal-hdr">D20</div><div class="cal-hdr">D21</div>
+  <div class="cal-hdr">D22</div><div class="cal-hdr">D23</div>
+
+  <!-- Trip A: 4.2 days -->
+  <div class="cal-label">A – Loc 17</div>
+  <div class="cal-cell" style="background:#7c3aed;">17</div>
+  <div class="cal-cell" style="background:#7c3aed;">17</div>
+  <div class="cal-cell" style="background:#7c3aed;">17</div>
+  <div class="cal-cell" style="background:#7c3aed;">17</div>
+  <div class="cal-cell" style="background:#5b21b6;opacity:0.5;">½</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+
+  <!-- Trip B: 2.7 days, starts D1 -->
+  <div class="cal-label">B – Locs 5,6</div>
+  <div class="cal-cell" style="background:#7c3aed;">6</div>
+  <div class="cal-cell" style="background:#7c3aed;">5</div>
+  <div class="cal-cell" style="background:#7c3aed;">5</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+
+  <!-- Trip C+D: 4.8 days, starts D4 (after B finishes) -->
+  <div class="cal-label">C – Locs 25,26</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-cell" style="background:#7c3aed;">26</div>
+  <div class="cal-cell" style="background:#7c3aed;">26</div>
+  <div class="cal-cell" style="background:#7c3aed;">25</div>
+  <div class="cal-cell" style="background:#7c3aed;">25</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div>
+
+  <div class="cal-label">D – Locs 22-24</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div>
+  <div class="cal-cell" style="background:#2563eb;">22</div>
+  <div class="cal-cell" style="background:#2563eb;">24</div>
+  <div class="cal-cell" style="background:#2563eb;opacity:0.5;">23</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div>
+
+  <!-- Trip E+F: Jackson SB cluster, starts D8 -->
+  <div class="cal-label">E – Locs 7,9</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div>
+  <div class="cal-cell" style="background:#2563eb;">7</div>
+  <div class="cal-cell" style="background:#2563eb;">9</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div>
+
+  <div class="cal-label">F – Locs 8,10,11</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-cell" style="background:#2563eb;opacity:0.6;">½</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div>
+
+  <!-- Trip G: Victoria US 59 UP RR, starts D13 -->
+  <div class="cal-label">G – Locs 13-15</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div>
+  <div class="cal-cell" style="background:#2563eb;">14/13</div>
+  <div class="cal-cell" style="background:#2563eb;">15</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div>
+
+  <!-- Trip H: Victoria west, starts D15 -->
+  <div class="cal-label">H – Locs 16,28,29</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-cell" style="background:#2563eb;">29/28/16</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div>
+
+  <!-- Trip I: Victoria US 59 SB, starts D16 -->
+  <div class="cal-label">I – Locs 19-21,27</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div>
+  <div class="cal-cell" style="background:#2563eb;">19/21</div>
+  <div class="cal-cell" style="background:#2563eb;">20/27</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div>
+
+  <!-- Trip J+K: Wharton, starts D18 -->
+  <div class="cal-label">J – Locs 30-33</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-cell" style="background:#2563eb;">33</div>
+  <div class="cal-cell" style="background:#2563eb;">31/30</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+
+  <div class="cal-label">K – Locs 32,34</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-cell" style="background:#2563eb;opacity:0.7;">34/32</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div>
+
+  <!-- Trip L+O: Calhoun+Matagorda, starts D21 -->
+  <div class="cal-label">L+O – Locs 2,3,12</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-cell" style="background:#2563eb;">12/3</div>
+  <div class="cal-cell" style="background:#2563eb;opacity:0.6;">2</div>
+
+  <!-- Trip M+N: Isolated, Day 23 -->
+  <div class="cal-label">M+N – Locs 1,4</div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div><div class="cal-empty"></div><div class="cal-empty"></div>
+  <div class="cal-empty"></div>
+  <div class="cal-cell" style="background:#b45309;">4/1</div>
+
+</div>
+
+<p style="font-size:11px;color:#556;margin-top:10px;">* Calendar is sequential production days, not calendar days. Travel/mobilization days between county clusters add additional elapsed time.</p>
+
+</div>
+</body>
+</html>
