@@ -74,35 +74,38 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1f2e; color: #
 <div id="header">
   <div>
     <h1>Production Status Map — Item 429-7007 | CONC STR REPAIR (VERTICAL &amp; OVERHEAD)</h1>
-    <p>Victoria District &nbsp;|&nbsp; Plan vs. production-to-date (through 2026-08-05) &nbsp;|&nbsp; Click any marker for detail</p>
+    <p>Victoria District &nbsp;|&nbsp; Plan vs. production-to-date (through 2026-10-28) &nbsp;|&nbsp; Click any marker for detail</p>
   </div>
 </div>
 
 <div id="stats">
   <div class="stat"><div class="v" id="s-total">34</div><div class="l">Locations</div></div>
-  <div class="stat"><div class="v" style="color:#22c55e;" id="s-complete">13</div><div class="l">Complete</div></div>
-  <div class="stat"><div class="v" style="color:#f59e0b;" id="s-partial">3</div><div class="l">Partial</div></div>
-  <div class="stat"><div class="v" style="color:#ef4444;" id="s-untouched">18</div><div class="l">Untouched</div></div>
-  <div class="stat"><div class="v" id="s-planned">671</div><div class="l">Planned SF</div></div>
-  <div class="stat"><div class="v" id="s-produced">749</div><div class="l">Produced SF</div></div>
-  <div class="stat"><div class="v" id="s-pct">112%</div><div class="l">% of Plan SF</div></div>
-  <div class="stat"><div class="v" style="color:#fbbf24;" id="s-tc">6</div><div class="l">Need Traffic Control</div></div>
+  <div class="stat"><div class="v" style="color:#22c55e;" id="s-complete">22</div><div class="l">Complete</div></div>
+  <div class="stat"><div class="v" style="color:#f59e0b;" id="s-partial">7</div><div class="l">Partial</div></div>
+  <div class="stat"><div class="v" style="color:#ef4444;" id="s-untouched">4</div><div class="l">Untouched</div></div>
+  <div class="stat"><div class="v" style="color:#94a3b8;" id="s-norepair">1</div><div class="l">No Repair Found</div></div>
+  <div class="stat"><div class="v" id="s-planned">667</div><div class="l">Planned SF</div></div>
+  <div class="stat"><div class="v" id="s-produced">910</div><div class="l">Produced SF</div></div>
+  <div class="stat"><div class="v" id="s-pct">137%</div><div class="l">% of Plan SF</div></div>
+  <div class="stat"><div class="v" style="color:#fbbf24;" id="s-tc">5</div><div class="l">Need Traffic Control</div></div>
 </div>
 
 <div id="legend">
   <div class="leg"><div class="leg-dot" style="background:#22c55e;"></div><span>Complete — production ≥ planned SF</span></div>
   <div class="leg"><div class="leg-dot" style="background:#f59e0b;"></div><span>Partial — some production, work remains</span></div>
   <div class="leg"><div class="leg-dot" style="background:#ef4444;"></div><span>Untouched — no production recorded</span></div>
-  <div class="leg"><div class="leg-dot" style="background:#1a1f2e;border:2px dashed #fbbf24;"></div><span>🚧 Requires traffic control — lane closure (Locs 7, 10, 15, 18, 29, 30)</span></div>
+  <div class="leg"><div class="leg-dot" style="background:#64748b;"></div><span>No Repair Found — inspected, no work required</span></div>
+  <div class="leg"><div class="leg-dot" style="background:#1a1f2e;border:2px dashed #fbbf24;"></div><span>🚧 Requires traffic control — lane closure (Locs 7, 10, 15, 29, 30)</span></div>
 </div>
 
 <div id="controls">
   <span style="font-size:11px;color:#8892b0;">Filter:</span>
   <button class="filter-btn active" data-status="all">All (34)</button>
-  <button class="filter-btn" data-status="complete">Complete (13)</button>
-  <button class="filter-btn" data-status="partial">Partial (3)</button>
-  <button class="filter-btn" data-status="untouched">Untouched (18)</button>
-  <button class="filter-btn" data-status="tc" style="border-color:#fbbf24;color:#fde68a;">🚧 Traffic Control (6)</button>
+  <button class="filter-btn" data-status="complete">Complete (22)</button>
+  <button class="filter-btn" data-status="partial">Partial (7)</button>
+  <button class="filter-btn" data-status="untouched">Untouched (4)</button>
+  <button class="filter-btn" data-status="norepair">No Repair Found (1)</button>
+  <button class="filter-btn" data-status="tc" style="border-color:#fbbf24;color:#fde68a;">🚧 Traffic Control (5)</button>
   <button class="filter-btn" id="reset-btn" style="margin-left:8px;">Reset View</button>
   <span style="font-size:11px;color:#8892b0;margin-left:8px;" id="showing">Showing 34 locations</span>
 </div>
@@ -117,41 +120,42 @@ var COLORS = {
   complete:  {fill:'#22c55e', stroke:'#15803d'},
   partial:   {fill:'#f59e0b', stroke:'#b45309'},
   untouched: {fill:'#ef4444', stroke:'#b91c1c'},
-  nodata:    {fill:'#9ca3af', stroke:'#4b5563'}
+  nodata:    {fill:'#9ca3af', stroke:'#4b5563'},
+  norepair:  {fill:'#64748b', stroke:'#334155'}
 };
-var LABELS = { complete: 'Complete', partial: 'Partial', untouched: 'Untouched', nodata: 'No Data' };
+var LABELS = { complete: 'Complete', partial: 'Partial', untouched: 'Untouched', nodata: 'No Data', norepair: 'No Repair Found' };
 
 var DATA = [
   {loc:1, lat:29.686483, lng:-96.129672, road:'SH 36', feat:'Flat Creek', county:'Austin', qty:6, prod:12.28, rem:-6.28, pct:204.7, status:'complete'},
-  {loc:2, lat:28.492539, lng:-96.84673, road:'SH 35', feat:'Schwings Bayou Relief', county:'Calhoun', qty:18, prod:0.0, rem:18.0, pct:0.0, status:'untouched'},
-  {loc:3, lat:28.487603, lng:-96.851656, road:'SH 35', feat:'Schwings Bayou', county:'Calhoun', qty:9, prod:0.0, rem:9.0, pct:0.0, status:'untouched'},
-  {loc:4, lat:29.496136, lng:-96.419968, road:'SH 71', feat:'Marys Branch', county:'Colorado', qty:4, prod:0.0, rem:4.0, pct:0.0, status:'untouched'},
+  {loc:2, lat:28.492539, lng:-96.84673, road:'SH 35', feat:'Schwings Bayou Relief', county:'Calhoun', qty:18, prod:13.5, rem:4.5, pct:75.0, status:'partial'},
+  {loc:3, lat:28.487603, lng:-96.851656, road:'SH 35', feat:'Schwings Bayou', county:'Calhoun', qty:9, prod:5.41, rem:3.59, pct:60.1, status:'partial'},
+  {loc:4, lat:29.496136, lng:-96.419968, road:'SH 71', feat:'Marys Branch', county:'Colorado', qty:4, prod:4.0, rem:0.0, pct:100.0, status:'complete'},
   {loc:5, lat:28.913127, lng:-96.773587, road:'US 59 NB', feat:'Arenosa Creek', county:'Jackson', qty:67, prod:87.38, rem:-20.38, pct:130.4, status:'complete'},
   {loc:6, lat:28.922783, lng:-96.755116, road:'US 59 NB', feat:'W Dry Creek', county:'Jackson', qty:13, prod:45.56, rem:-32.56, pct:350.5, status:'complete'},
-  {loc:7, lat:28.986756, lng:-96.650653, road:'US 59 SB', feat:'SH 111', county:'Jackson', qty:13, prod:0.0, rem:13.0, pct:0.0, status:'untouched', tc:true},
-  {loc:8, lat:29.025428, lng:-96.553057, road:'US 59 SB', feat:'Navidad River', county:'Jackson', qty:8, prod:0.0, rem:8.0, pct:0.0, status:'untouched'},
+  {loc:7, lat:28.986756, lng:-96.650653, road:'US 59 SB', feat:'SH 111', county:'Jackson', qty:13, prod:29.99, rem:-16.99, pct:230.7, status:'complete', tc:true},
+  {loc:8, lat:29.025428, lng:-96.553057, road:'US 59 SB', feat:'Navidad River', county:'Jackson', qty:8, prod:2.5, rem:5.5, pct:31.2, status:'partial'},
   {loc:9, lat:28.99004, lng:-96.642071, road:'US 59', feat:'Post Oak Branch', county:'Jackson', qty:40, prod:21.22, rem:18.78, pct:53.0, status:'partial'},
-  {loc:10, lat:29.049529, lng:-96.51556, road:'US 59 NB', feat:'FM 710', county:'Jackson', qty:4, prod:0.0, rem:4.0, pct:0.0, status:'untouched', tc:true},
+  {loc:10, lat:29.049529, lng:-96.51556, road:'US 59 NB', feat:'FM 710', county:'Jackson', qty:4, prod:10.25, rem:-6.25, pct:256.2, status:'complete', tc:true},
   {loc:11, lat:29.024008, lng:-96.505032, road:'SH 172', feat:'Lake Texana Mustang Ck', county:'Jackson', qty:2, prod:0.0, rem:2.0, pct:0.0, status:'untouched'},
-  {loc:12, lat:28.983077, lng:-95.966639, road:'SH 35', feat:'Cottonwood Creek', county:'Matagorda', qty:10, prod:0.0, rem:10.0, pct:0.0, status:'untouched'},
-  {loc:13, lat:28.7612, lng:-96.983448, road:'US 59 SB', feat:'Union Pacific RR', county:'Victoria', qty:14, prod:0.0, rem:14.0, pct:0.0, status:'untouched'},
-  {loc:14, lat:28.761064, lng:-96.983283, road:'US 59 NB', feat:'Union Pacific RR', county:'Victoria', qty:8, prod:0.0, rem:8.0, pct:0.0, status:'untouched'},
+  {loc:12, lat:28.983077, lng:-95.966639, road:'SH 35', feat:'Cottonwood Creek', county:'Matagorda', qty:10, prod:18.57, rem:-8.57, pct:185.7, status:'complete'},
+  {loc:13, lat:28.7612, lng:-96.983448, road:'US 59 SB', feat:'Union Pacific RR', county:'Victoria', qty:14, prod:14.87, rem:-0.87, pct:106.2, status:'complete'},
+  {loc:14, lat:28.761064, lng:-96.983283, road:'US 59 NB', feat:'Union Pacific RR', county:'Victoria', qty:8, prod:9.85, rem:-1.85, pct:123.1, status:'complete'},
   {loc:15, lat:28.766383, lng:-96.977882, road:'SH 185', feat:'US 59', county:'Victoria', qty:29, prod:0.0, rem:29.0, pct:0.0, status:'untouched', tc:true},
   {loc:16, lat:28.741527, lng:-97.024125, road:'US 59 NB', feat:'Guadalupe West Relief', county:'Victoria', qty:12, prod:23.06, rem:-11.06, pct:192.2, status:'complete'},
   {loc:17, lat:28.786058, lng:-97.038165, road:'BU 59/77 NB', feat:'Guadalupe River Relief', county:'Victoria', qty:127, prod:291.61, rem:-164.61, pct:229.6, status:'complete'},
-  {loc:18, lat:28.793038, lng:-97.012957, road:'BU 59/77 NB', feat:'Guadalupe River', county:'Victoria', qty:4, prod:0.0, rem:4.0, pct:0.0, status:'untouched', tc:true},
+  {loc:18, lat:28.793038, lng:-97.012957, road:'BU 59/77 NB', feat:'Guadalupe River', county:'Victoria', qty:4, prod:0.0, rem:0.0, pct:0.0, status:'norepair'},
   {loc:19, lat:28.873209, lng:-96.849846, road:'US 59 NB', feat:'Casa Blanca Ck Trib', county:'Victoria', qty:15, prod:0.0, rem:15.0, pct:0.0, status:'untouched'},
   {loc:20, lat:28.89252, lng:-96.820676, road:'US 59 SB', feat:'Garcitas Creek', county:'Victoria', qty:20, prod:27.99, rem:-7.99, pct:139.9, status:'complete'},
   {loc:21, lat:28.905452, lng:-96.792139, road:'US 59 SB', feat:'FM 444', county:'Victoria', qty:20, prod:20.01, rem:-0.01, pct:100.1, status:'complete'},
   {loc:22, lat:28.660461, lng:-97.047058, road:'US 77', feat:'Drain', county:'Victoria', qty:7, prod:8.54, rem:-1.54, pct:122.0, status:'complete'},
   {loc:23, lat:28.71185, lng:-97.042488, road:'US 77 NB', feat:'Coleto Creek', county:'Victoria', qty:3, prod:2.48, rem:0.52, pct:82.7, status:'partial'},
-  {loc:24, lat:28.692076, lng:-97.046997, road:'US 77', feat:'Drain', county:'Victoria', qty:22, prod:41.52, rem:-19.52, pct:188.7, status:'complete'},
-  {loc:25, lat:28.682936, lng:-97.047009, road:'US 77', feat:'Drain', county:'Victoria', qty:50, prod:0.0, rem:50.0, pct:0.0, status:'untouched'},
+  {loc:24, lat:28.692076, lng:-97.046997, road:'US 77', feat:'Drain', county:'Victoria', qty:22, prod:49.72, rem:-27.72, pct:226.0, status:'complete'},
+  {loc:25, lat:28.682936, lng:-97.047009, road:'US 77', feat:'Drain', county:'Victoria', qty:50, prod:16.88, rem:33.12, pct:33.8, status:'partial'},
   {loc:26, lat:28.666735, lng:-97.047249, road:'US 77', feat:'Drain', county:'Victoria', qty:60, prod:40.66, rem:19.34, pct:67.8, status:'partial'},
-  {loc:27, lat:28.719759, lng:-96.777474, road:'FM 616', feat:'Draw', county:'Victoria', qty:3, prod:7.1, rem:-4.1, pct:236.7, status:'complete'},
-  {loc:28, lat:28.812748, lng:-97.082817, road:'FM 236', feat:'Draw', county:'Victoria', qty:16, prod:0.0, rem:16.0, pct:0.0, status:'untouched'},
-  {loc:29, lat:28.857096, lng:-97.025302, road:'US 77', feat:'US 87 & UPRR', county:'Victoria', qty:2, prod:0.0, rem:2.0, pct:0.0, status:'untouched', tc:true},
-  {loc:30, lat:29.174965, lng:-96.277106, road:'US 59 NB', feat:'FM 1163', county:'Wharton', qty:1, prod:0.0, rem:1.0, pct:0.0, status:'untouched', tc:true},
+  {loc:27, lat:28.719759, lng:-96.777474, road:'FM 616', feat:'Draw', county:'Victoria', qty:3, prod:9.92, rem:-6.92, pct:330.7, status:'complete'},
+  {loc:28, lat:28.812748, lng:-97.082817, road:'FM 236', feat:'Draw', county:'Victoria', qty:16, prod:18.07, rem:-2.07, pct:112.9, status:'complete'},
+  {loc:29, lat:28.857096, lng:-97.025302, road:'US 77', feat:'US 87 & UPRR', county:'Victoria', qty:2, prod:5.9, rem:-3.9, pct:295.0, status:'complete', tc:true},
+  {loc:30, lat:29.174965, lng:-96.277106, road:'US 59 NB', feat:'FM 1163', county:'Wharton', qty:1, prod:1.0, rem:0.0, pct:100.0, status:'complete', tc:true},
   {loc:31, lat:29.180871, lng:-96.254647, road:'US 59 SB', feat:'Tres Palacios River', county:'Wharton', qty:12, prod:28.7, rem:-16.7, pct:239.2, status:'complete'},
   {loc:32, lat:29.241529, lng:-96.1955, road:'LP 526', feat:'Jones Creek', county:'Wharton', qty:11, prod:34.65, rem:-23.65, pct:315.0, status:'complete'},
   {loc:33, lat:29.235078, lng:-96.334666, road:'FM 1300', feat:'Draw', county:'Wharton', qty:32, prod:55.89, rem:-23.89, pct:174.7, status:'complete'},
@@ -230,6 +234,10 @@ function renderMarkers(filter) {
       qtyLine = '<div class="popup-row"><span class="popup-key">Planned qty</span><span class="popup-val">Not on file</span></div>';
       prodLine = '<div class="popup-row"><span class="popup-key">Produced</span><span class="popup-val">' + d.prod.toFixed(2) + ' SF</span></div>';
       remLine = '<div class="popup-row" style="color:#9ca3af;font-size:11px;margin-top:4px;">Not in current mapped schedule — added from NBI lookup. Confirm bid quantity to classify.</div>';
+    } else if (d.status === 'norepair') {
+      qtyLine = '<div class="popup-row"><span class="popup-key">Planned</span><span class="popup-val">' + d.qty + ' SF</span></div>';
+      prodLine = '<div class="popup-row"><span class="popup-key">Produced</span><span class="popup-val">0 SF</span></div>';
+      remLine = '<div class="popup-row" style="color:#94a3b8;font-size:11px;margin-top:4px;">Inspected in the field — no repair found. No work required at this location.</div>';
     } else {
       var over = d.rem < 0;
       qtyLine = '<div class="popup-row"><span class="popup-key">Planned</span><span class="popup-val">' + d.qty + ' SF</span></div>';
